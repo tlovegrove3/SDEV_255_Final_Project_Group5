@@ -25,7 +25,7 @@ function Home() {
       <div className="action-cards">
         <div
           style={{
-            background: "#f8f9fa",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
             padding: "15px",
             borderRadius: "8px",
             margin: "10px 0",
@@ -38,7 +38,7 @@ function Home() {
 
         <div
           style={{
-            background: "#f8f9fa",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
             padding: "15px",
             borderRadius: "8px",
             margin: "10px 0",
