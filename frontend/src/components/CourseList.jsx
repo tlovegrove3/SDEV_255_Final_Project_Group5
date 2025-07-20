@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
+import { useHash } from "../hooks/useHash";
 
 function CourseList() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // You can make this configurable later
-  // const API_BASE_URL = "http://localhost:3000/api";
+  const { navigate } = useHash();
   const API_BASE_URL = "https://sdev-255-final-project-group5.onrender.com/api";
 
   useEffect(() => {
@@ -23,7 +23,6 @@ function CourseList() {
         throw new Error(result.error || "Failed to fetch courses");
       }
 
-      // Backend now returns { success: true, data: courses }
       setCourses(result.data || []);
     } catch (err) {
       console.error("Error fetching courses:", err);
@@ -33,32 +32,6 @@ function CourseList() {
     }
   };
 
-  const deleteCourse = async (courseId) => {
-    if (!window.confirm("Are you sure you want to delete this course?")) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/courses/${courseId}`, {
-        method: "DELETE",
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to delete course");
-      }
-
-      // Remove the course from local state
-      setCourses(courses.filter((course) => course._id !== courseId));
-      alert("Course deleted successfully! ✅");
-    } catch (err) {
-      console.error("Error deleting course:", err);
-      alert("Error deleting course: " + err.message);
-    }
-  };
-
-  // Render loading state, error state, or course list
   if (loading) {
     return (
       <div className="loading">
@@ -68,7 +41,6 @@ function CourseList() {
     );
   }
 
-  // If there's an error, show it
   if (error) {
     return (
       <div className="error">
@@ -84,7 +56,6 @@ function CourseList() {
     );
   }
 
-  // If no courses, show empty state
   return (
     <div className="course-list">
       <div className="page-header">
@@ -92,6 +63,12 @@ function CourseList() {
         <p>
           Total courses: <strong>{courses.length}</strong>
         </p>
+        <button
+          onClick={() => navigate("/add-course")}
+          className="add-btn"
+        >
+          ➕ Add New Course
+        </button>
       </div>
 
       {courses.length === 0 ? (
@@ -99,52 +76,46 @@ function CourseList() {
           <h3>📝 No courses available yet</h3>
           <p>Add some courses to get started!</p>
           <button
-            onClick={() => (window.location.hash = "add")}
+            onClick={() => navigate("/add-course")}
             className="cta-btn"
           >
             Add Your First Course
           </button>
         </div>
       ) : (
-        <div className="courses-grid">
-          {courses.map((course) => (
-            <div
-              key={course._id}
-              className="course-card"
-            >
-              <div className="course-header">
-                <h3>{course.cname}</h3>
-                <span className="course-code">{course.code}</span>
-              </div>
-
-              <div className="course-info">
-                <p>
-                  <strong>📊 Credits:</strong> {course.credits}
-                </p>
-                <p>
-                  <strong>🎓 Subject:</strong> {course.subject_area}
-                </p>
-                <p>
-                  <strong>📋 Description:</strong> {course.description}
-                </p>
-              </div>
-
-              <div className="course-meta">
-                <small>
-                  Created: {new Date(course.createdAt).toLocaleDateString()}
-                </small>
-              </div>
-
-              <div className="course-actions">
-                <button
-                  onClick={() => deleteCourse(course._id)}
-                  className="delete-btn"
-                >
-                  🗑️ Delete Course
-                </button>
-              </div>
-            </div>
-          ))}
+        <div className="course-list-simple">
+          <table className="courses-table">
+            <thead>
+              <tr>
+                <th>Course Code</th>
+                <th>Course Name</th>
+                <th>Credits</th>
+              </tr>
+            </thead>
+            <tbody>
+              {courses.map((course) => (
+                <tr key={course._id}>
+                  <td>
+                    <button
+                      onClick={() => navigate(`/courses/${course._id}`)}
+                      className="course-link"
+                    >
+                      {course.code}
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => navigate(`/courses/${course._id}`)}
+                      className="course-link"
+                    >
+                      {course.cname}
+                    </button>
+                  </td>
+                  <td>{course.credits}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
