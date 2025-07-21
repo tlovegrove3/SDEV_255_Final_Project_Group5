@@ -1,11 +1,14 @@
-import { useState } from "react";
+// import { useState } from "react";
+import CourseDetail from "./components/CourseDetail.jsx";
+import { useHash, parseHash } from "./hooks/useHash";
 import Home from "./components/Home.jsx";
 import CourseList from "./components/CourseList.jsx";
 import AddCourse from "./components/AddCourse.jsx";
 import "./App.css";
 
 function App() {
-  const [page, setPage] = useState("home");
+  const { hash, navigate } = useHash();
+  const { page, id } = parseHash(hash);
 
   return (
     <div className="App">
@@ -13,20 +16,20 @@ function App() {
         <h2>🎓 University Course Manager</h2>
         <div className="nav-links">
           <button
-            onClick={() => setPage("home")}
+            onClick={() => navigate("/home")}
             className={page === "home" ? "active" : ""}
           >
             🏠 Home
           </button>
           <button
-            onClick={() => setPage("courses")}
+            onClick={() => navigate("/courses")}
             className={page === "courses" ? "active" : ""}
           >
             📚 Courses
           </button>
           <button
-            onClick={() => setPage("add")}
-            className={page === "add" ? "active" : ""}
+            onClick={() => navigate("/add-course")}
+            className={page === "add-course" ? "active" : ""}
           >
             ➕ Add Course
           </button>
@@ -35,8 +38,9 @@ function App() {
 
       <main className="main-content">
         {page === "home" && <Home />}
-        {page === "courses" && <CourseList />}
-        {page === "add" && <AddCourse />}
+        {page === "courses" && id && <CourseDetail courseId={id} />}
+        {page === "courses" && !id && <CourseList />}
+        {page === "add-course" && <AddCourse />}
       </main>
     </div>
   );
