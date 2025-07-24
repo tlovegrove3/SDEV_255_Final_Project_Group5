@@ -215,7 +215,8 @@ frontend/src/
 1. **User Authentication**: Login/register functionality
 2. **Role-Based Views**: Different interfaces for students vs teachers
 3. **Course Enrollment**: Students can add/drop courses
-4. **User Dashboards**: Personalized views for enrolled courses
+4. **Teacher Course Editing**: Teachers can create, edit, and delete courses.
+5. **User Dashboards**: Personalized views for enrolled courses
 
 ### **Technical Implementation**
 
