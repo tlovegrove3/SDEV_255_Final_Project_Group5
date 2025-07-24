@@ -15,6 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
+app.use("/api/auth", require("./routes/auth"));
 app.use("/api/courses", require("./routes/courses"));
 app.use("/api/students", require("./routes/students"));
 app.use("/api/teachers", require("./routes/teachers"));
@@ -26,6 +27,7 @@ app.get("/", (req, res) => {
     version: "1.0.0",
     status: "healthy",
     endpoints: {
+      auth: "/api/auth",
       courses: "/api/courses",
       students: "/api/students",
       teachers: "/api/teachers",
@@ -49,7 +51,7 @@ app.use((err, req, res, next) => {
 app.use("*", (req, res) => {
   res.status(404).json({
     error: "Route not found",
-    availableRoutes: ["/api/courses", "/api/students", "/api/teachers"],
+    availableRoutes: ["/api/auth", "/api/courses", "/api/students", "/api/teachers"],
   });
 });
 

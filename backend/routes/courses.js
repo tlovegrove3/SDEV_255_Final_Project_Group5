@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Course = require("../models/courses");
+const { authenticate, requireTeacher } = require("../middleware/auth");
 
 // GET /api/courses - Get all courses
 router.get("/", async (req, res) => {
@@ -43,8 +44,8 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST /api/courses - Create new course
-router.post("/", async (req, res) => {
+// POST /api/courses - Create new course (Teachers only)
+router.post("/", authenticate, requireTeacher, async (req, res) => {
   try {
     const { cname, code, description, subject_area, credits } = req.body;
 
@@ -92,8 +93,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT /api/courses/:id - Update course
-router.put("/:id", async (req, res) => {
+// PUT /api/courses/:id - Update course (Teachers only)
+router.put("/:id", authenticate, requireTeacher, async (req, res) => {
   try {
     const updatedCourse = await Course.findByIdAndUpdate(
       req.params.id,
@@ -122,8 +123,8 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/courses/:id - Delete course
-router.delete("/:id", async (req, res) => {
+// DELETE /api/courses/:id - Delete course (Teachers only)
+router.delete("/:id", authenticate, requireTeacher, async (req, res) => {
   try {
     const deletedCourse = await Course.findByIdAndDelete(req.params.id);
 
