@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiConfig } from "../config/api";
 
 function AddCourse() {
   const [courseData, setCourseData] = useState({
@@ -10,9 +11,6 @@ function AddCourse() {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
-
-  // const API_BASE_URL = "http://localhost:3000/api";
-  const API_BASE_URL = "https://sdev-255-final-project-group5.onrender.com/api";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,11 +31,8 @@ function AddCourse() {
     setMessage({ text: "", type: "" });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/courses`, {
+      const response = await apiConfig.fetchPublic("/courses", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           ...courseData,
           credits: parseInt(courseData.credits),

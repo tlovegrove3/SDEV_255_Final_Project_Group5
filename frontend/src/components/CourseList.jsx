@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useHash } from "../hooks/useHash";
+import { apiConfig } from "../config/api";
 
 function CourseList() {
   const [courses, setCourses] = useState([]);
@@ -7,7 +8,6 @@ function CourseList() {
   const [error, setError] = useState(null);
 
   const { navigate } = useHash();
-  const API_BASE_URL = "https://sdev-255-final-project-group5.onrender.com/api";
 
   useEffect(() => {
     fetchCourses();
@@ -16,7 +16,7 @@ function CourseList() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/courses`);
+      const response = await apiConfig.fetchPublic("/courses");
       const result = await response.json();
 
       if (!response.ok) {

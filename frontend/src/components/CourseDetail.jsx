@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useHash } from "../hooks/useHash";
+import { apiConfig } from "../config/api";
 
 function CourseDetail({ courseId }) {
   const [course, setCourse] = useState(null);
@@ -9,7 +10,6 @@ function CourseDetail({ courseId }) {
   const [editData, setEditData] = useState({});
 
   const { navigate } = useHash();
-  const API_BASE_URL = "https://sdev-255-final-project-group5.onrender.com/api";
 
   useEffect(() => {
     if (courseId) {
@@ -20,7 +20,7 @@ function CourseDetail({ courseId }) {
   const fetchCourse = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/courses/${courseId}`);
+      const response = await apiConfig.fetchPublic(`/courses/${courseId}`);
       const result = await response.json();
 
       if (!response.ok) {
@@ -39,9 +39,8 @@ function CourseDetail({ courseId }) {
   const handleEdit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_BASE_URL}/courses/${courseId}`, {
+      const response = await apiConfig.fetchPublic(`/courses/${courseId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editData),
       });
 
@@ -62,7 +61,7 @@ function CourseDetail({ courseId }) {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/courses/${courseId}`, {
+      const response = await apiConfig.fetchPublic(`/courses/${courseId}`, {
         method: "DELETE",
       });
 
