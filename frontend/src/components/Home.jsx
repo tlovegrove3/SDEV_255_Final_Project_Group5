@@ -1,52 +1,64 @@
 function Home() {
   return (
     <div className="home">
-      <h1>🎓 Welcome to University Course Manager</h1>
-      <p>Your one-stop solution for managing university courses</p>
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1>Streamline Your Academic Journey</h1>
+          <p className="hero-description">
+            A modern platform for managing university courses with role-based
+            access for students and teachers.
+            <br /> Browse courses, manage enrollments, and track your academic
+            progress.
+          </p>
 
-      <div
-        style={{
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          color: "white",
-          padding: "20px",
-          borderRadius: "10px",
-          margin: "20px 0",
-        }}
-      >
-        <h3>✅ System Status</h3>
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          <li>🔌 Backend API: Connected</li>
-          <li>🗄️ Database: MongoDB Atlas</li>
-          <li>⚛️ Frontend: React + Vite</li>
-          <li>🚀 Status: Ready for Stage 1</li>
-        </ul>
-      </div>
-
-      <div className="action-cards">
-        <div
-          style={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            padding: "15px",
-            borderRadius: "8px",
-            margin: "10px 0",
-            border: "1px solid #dee2e6",
-          }}
-        >
-          <h4>📚 Course Management</h4>
-          <p>Create, view, edit, and delete courses</p>
+          <div className="quick-actions">
+            <button
+              className="cta-button primary"
+              onClick={() => (window.location.hash = "#/courses")}
+            >
+              Browse Courses
+            </button>
+            <br />
+          </div>
+          <h1>Features</h1>
         </div>
 
-        <div
-          style={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            padding: "15px",
-            borderRadius: "8px",
-            margin: "10px 0",
-            border: "1px solid #dee2e6",
-          }}
-        >
-          <h4>🔮 Coming in Stage 2</h4>
-          <p>Student enrollment, teacher dashboards, and authentication</p>
+        <div className="features-grid">
+          <div className="feature-card">
+            <span className="feature-icon">📚</span>
+            <h3 className="feature-title">Course Management</h3>
+            <p className="feature-description">
+              Browse and manage courses with detailed information including
+              credits, descriptions, and prerequisites.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <span className="feature-icon">👥</span>
+            <h3 className="feature-title">Role-Based Access</h3>
+            <p className="feature-description">
+              Separate interfaces for students and teachers with appropriate
+              permissions and functionality.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <span className="feature-icon">🔐</span>
+            <h3 className="feature-title">Secure Authentication</h3>
+            <p className="feature-description">
+              JWT-based authentication system with password hashing and secure
+              session management.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <span className="feature-icon">📱</span>
+            <h3 className="feature-title">Modern Interface</h3>
+            <p className="feature-description">
+              Clean, responsive design with dark/light theme support and
+              intuitive navigation.
+            </p>
+          </div>
         </div>
       </div>
     </div>

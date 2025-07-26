@@ -59,7 +59,8 @@ function CourseList() {
   return (
     <div className="course-list">
       <div className="page-header">
-        <h1>📚 Available Courses</h1>
+        <h2>📚 Available Courses</h2>
+        <h3>Click on a course to view details and additional actions.</h3>
         <p>
           Total courses: <strong>{courses.length}</strong>
         </p>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiConfig } from "../config/api";
+import { useAuth } from "../hooks/useAuth";
 
 function AddCourse() {
   const [courseData, setCourseData] = useState({
@@ -74,7 +75,7 @@ function AddCourse() {
   return (
     <div className="add-course">
       <div className="page-header">
-        <h1>➕ Add New Course</h1>
+        <h2>➕ Add New Course</h2>
         <p>Fill out the form below to create a new course</p>
       </div>
 

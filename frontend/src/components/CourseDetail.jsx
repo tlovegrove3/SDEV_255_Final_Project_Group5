@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useHash } from "../hooks/useHash";
 import { apiConfig } from "../config/api";
+import { useAuth } from "../hooks/useAuth";
 
 function CourseDetail({ courseId }) {
   const [course, setCourse] = useState(null);
@@ -8,12 +9,73 @@ function CourseDetail({ courseId }) {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
-
   const { navigate } = useHash();
+  const [enrollmentStatus, setEnrollmentStatus] = useState(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const { isAuthenticated, getRole } = useAuth();
+  const role = getRole();
+
+  const checkEnrollmentStatus = async () => {
+    if (role === "student" && isAuthenticated()) {
+      try {
+        const response = await apiConfig.fetchWithAuth("/students/my-courses");
+        const data = await response.json();
+        if (data.success) {
+          const enrolled = data.data.some((course) => course._id === courseId);
+          setIsEnrolled(enrolled);
+        }
+      } catch (error) {
+        console.error("Error checking enrollment:", error);
+      }
+    }
+  };
+
+  const enrollInCourse = async () => {
+    try {
+      const response = await apiConfig.fetchWithAuth("/students/enroll", {
+        method: "POST",
+        body: JSON.stringify({ courseId }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setIsEnrolled(true);
+        setEnrollmentStatus("Successfully enrolled!");
+      } else {
+        setEnrollmentStatus(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      setEnrollmentStatus("Enrollment failed");
+    }
+  };
+
+  const dropCourse = async () => {
+    if (!confirm("Are you sure you want to drop this course?")) return;
+
+    try {
+      const response = await apiConfig.fetchWithAuth(
+        `/students/enroll/${courseId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        setIsEnrolled(false);
+        setEnrollmentStatus("Successfully dropped course");
+      } else {
+        setEnrollmentStatus(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      setEnrollmentStatus("Failed to drop course");
+    }
+  };
 
   useEffect(() => {
     if (courseId) {
       fetchCourse();
+      checkEnrollmentStatus();
     }
   }, [courseId]);
 
@@ -90,7 +152,7 @@ function CourseDetail({ courseId }) {
         >
           ← Back to Courses
         </button>
-        <h1>📚 Course Details</h1>
+        <h2>📚 Course Details</h2>
       </div>
 
       {!isEditing ? (
@@ -116,8 +178,49 @@ function CourseDetail({ courseId }) {
               {new Date(course.createdAt).toLocaleDateString()}
             </p>
           </div>
+          {isAuthenticated() && (
+            <div className="course-actions">
+              {role === "student" && (
+                <div>
+                  {isEnrolled ? (
+                    <button
+                      onClick={dropCourse}
+                      className="drop-btn"
+                    >
+                      Drop Course
+                    </button>
+                  ) : (
+                    <button
+                      onClick={enrollInCourse}
+                      className="enroll-btn"
+                    >
+                      Enroll in Course
+                    </button>
+                  )}
+                </div>
+              )}
 
-          <div className="course-actions">
+              {role === "teacher" && (
+                <div>
+                  <button onClick={() => setIsEditing(true)}>
+                    Edit Course
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="delete-btn"
+                  >
+                    Delete Course
+                  </button>
+                </div>
+              )}
+
+              {enrollmentStatus && (
+                <div className="status-message">{enrollmentStatus}</div>
+              )}
+            </div>
+          )}
+
+          {/* <div className="course-actions">
             <button
               onClick={() => setIsEditing(true)}
               className="edit-btn"
@@ -130,7 +233,7 @@ function CourseDetail({ courseId }) {
             >
               🗑️ Delete Course
             </button>
-          </div>
+          </div> */}
         </div>
       ) : (
         // Edit Mode
