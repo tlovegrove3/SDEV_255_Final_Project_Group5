@@ -3,10 +3,20 @@ const router = express.Router();
 const Course = require("../models/courses");
 const { authenticate, requireTeacher } = require("../middleware/auth");
 
-// GET /api/courses - Get all courses
+// GET /api/courses - Get all courses (filtered by availability for students)
 router.get("/", async (req, res) => {
   try {
-    const courses = await Course.find().sort({ createdAt: -1 });
+    let filter = {};
+    
+    // If request includes student role filter, only show available courses
+    if (req.query.role === 'student') {
+      filter.isAvailable = true;
+    }
+    
+    const courses = await Course.find(filter)
+      .populate('createdBy', 'name teacherId')
+      .sort({ createdAt: -1 });
+      
     res.json({
       success: true,
       count: courses.length,
@@ -64,6 +74,7 @@ router.post("/", authenticate, requireTeacher, async (req, res) => {
       description: description.trim(),
       subject_area: subject_area.trim(),
       credits: parseInt(credits),
+      createdBy: req.user._id,
     });
 
     const savedCourse = await newCourse.save();
@@ -123,17 +134,27 @@ router.put("/:id", authenticate, requireTeacher, async (req, res) => {
   }
 });
 
-// DELETE /api/courses/:id - Delete course (Teachers only)
+// DELETE /api/courses/:id - Delete course (Only course creator)
 router.delete("/:id", authenticate, requireTeacher, async (req, res) => {
   try {
-    const deletedCourse = await Course.findByIdAndDelete(req.params.id);
+    const course = await Course.findById(req.params.id);
 
-    if (!deletedCourse) {
+    if (!course) {
       return res.status(404).json({
         success: false,
         error: "Course not found",
       });
     }
+
+    // Check if the authenticated teacher created this course
+    if (course.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: "Only the course creator can delete this course",
+      });
+    }
+
+    const deletedCourse = await Course.findByIdAndDelete(req.params.id);
 
     res.json({
       success: true,
@@ -142,6 +163,46 @@ router.delete("/:id", authenticate, requireTeacher, async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting course:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// PATCH /api/courses/:id/availability - Toggle course availability (Only course creator)
+router.patch("/:id/availability", authenticate, requireTeacher, async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        error: "Course not found",
+      });
+    }
+
+    // Check if the authenticated teacher created this course
+    if (course.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: "Only the course creator can modify course availability",
+      });
+    }
+
+    // Toggle availability
+    course.isAvailable = !course.isAvailable;
+    course.updatedAt = Date.now();
+    
+    const updatedCourse = await course.save();
+
+    res.json({
+      success: true,
+      message: `Course ${updatedCourse.isAvailable ? 'made available' : 'hidden from'} students`,
+      data: updatedCourse,
+    });
+  } catch (error) {
+    console.error("Error toggling course availability:", error);
     res.status(500).json({
       success: false,
       error: error.message,
