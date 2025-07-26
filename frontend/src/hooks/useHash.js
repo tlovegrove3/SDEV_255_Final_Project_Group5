@@ -3,14 +3,6 @@ import { useState, useEffect } from "react";
 
 /**
  * Custom hook for managing hash-based routing
- *
- * Think of this like a "URL watcher" that tells your app
- * what page to show based on the # part of the URL
- *
- * Examples:
- * - yoursite.com#/courses → returns "/courses"
- * - yoursite.com#/courses/123 → returns "/courses/123"
- * - yoursite.com → returns "/" (default)
  */
 export function useHash() {
   // Function to get current hash from URL

@@ -1,48 +1,84 @@
-// import { useState } from "react";
-import CourseDetail from "./components/CourseDetail.jsx";
-import { useHash, parseHash } from "./hooks/useHash";
-import Home from "./components/Home.jsx";
-import CourseList from "./components/CourseList.jsx";
 import AddCourse from "./components/AddCourse.jsx";
 import "./App.css";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
+import { ThemeProvider } from "./contexts/ThemeContext.jsx";
+import CourseDetail from "./components/CourseDetail.jsx";
+import CourseList from "./components/CourseList.jsx";
+import Footer from "./components/Footer.jsx";
+import Home from "./components/Home.jsx";
+import Login from "./components/Login.jsx";
+import MyCourses from "./components/MyCourses";
+import Navigation from "./components/Navigation";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Register from "./components/Register.jsx";
+import { useHash, parseHash } from "./hooks/useHash";
 
 function App() {
-  const { hash, navigate } = useHash();
-  const { page, id } = parseHash(hash);
+  const { page, id } = parseHash(useHash().hash);
+
+  const renderPage = () => {
+    switch (page) {
+      case '':
+      case 'home':
+        return <Home />;
+
+      case 'login':
+        return <Login />;
+
+      case 'register':
+        return <Register />;
+
+      case 'student-dashboard':
+        return (
+          <ProtectedRoute requiredRole="student">
+            <CourseList />
+          </ProtectedRoute>
+        );
+
+      case 'teacher-dashboard':
+        return (
+          <ProtectedRoute requiredRole="teacher">
+            <CourseList />
+          </ProtectedRoute>
+        );
+
+      case 'my-courses':
+        return (
+          <ProtectedRoute requiredRole="student">
+            <MyCourses />
+          </ProtectedRoute>
+        );
+
+      case 'courses':
+        if (id) {
+          return <CourseDetail courseId={id} />;
+        }
+        return <CourseList />;
+
+      case 'add-course':
+        return (
+          <ProtectedRoute requiredRole="teacher">
+            <AddCourse />
+          </ProtectedRoute>
+        );
+
+      default:
+        return <div>Page not found</div>;
+    }
+  };
 
   return (
-    <div className="App">
-      <nav className="navbar">
-        <h2>🎓 University Course Manager</h2>
-        <div className="nav-links">
-          <button
-            onClick={() => navigate("/home")}
-            className={page === "home" ? "active" : ""}
-          >
-            🏠 Home
-          </button>
-          <button
-            onClick={() => navigate("/courses")}
-            className={page === "courses" ? "active" : ""}
-          >
-            📚 Courses
-          </button>
-          <button
-            onClick={() => navigate("/add-course")}
-            className={page === "add-course" ? "active" : ""}
-          >
-            ➕ Add Course
-          </button>
+    <ThemeProvider>
+      <AuthProvider>
+        <div className="app-layout">
+          <Navigation />
+          <main className="main-content">
+            {renderPage()}
+          </main>
+          <Footer />
         </div>
-      </nav>
-
-      <main className="main-content">
-        {page === "home" && <Home />}
-        {page === "courses" && id && <CourseDetail courseId={id} />}
-        {page === "courses" && !id && <CourseList />}
-        {page === "add-course" && <AddCourse />}
-      </main>
-    </div>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
