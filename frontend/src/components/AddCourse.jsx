@@ -32,7 +32,7 @@ function AddCourse() {
     setMessage({ text: "", type: "" });
 
     try {
-      const response = await apiConfig.fetchPublic("/courses", {
+      const response = await apiConfig.fetchWithAuth("/courses", {
         method: "POST",
         body: JSON.stringify({
           ...courseData,

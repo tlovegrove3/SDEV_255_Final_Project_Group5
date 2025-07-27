@@ -12,8 +12,13 @@ function CourseDetail({ courseId }) {
   const { navigate } = useHash();
   const [enrollmentStatus, setEnrollmentStatus] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
-  const { isAuthenticated, getRole } = useAuth();
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const { isAuthenticated, getRole, user } = useAuth();
   const role = getRole();
+  
+  // Check if current user is the course creator
+  const isCreator = course && user && course.createdBy && 
+                   course.createdBy._id === user._id;
 
   const checkEnrollmentStatus = async () => {
     if (role === "student" && isAuthenticated()) {
@@ -101,7 +106,7 @@ function CourseDetail({ courseId }) {
   const handleEdit = async (e) => {
     e.preventDefault();
     try {
-      const response = await apiConfig.fetchPublic(`/courses/${courseId}`, {
+      const response = await apiConfig.fetchWithAuth(`/courses/${courseId}`, {
         method: "PUT",
         body: JSON.stringify(editData),
       });
@@ -123,7 +128,7 @@ function CourseDetail({ courseId }) {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
 
     try {
-      const response = await apiConfig.fetchPublic(`/courses/${courseId}`, {
+      const response = await apiConfig.fetchWithAuth(`/courses/${courseId}`, {
         method: "DELETE",
       });
 
@@ -136,6 +141,26 @@ function CourseDetail({ courseId }) {
       navigate("/courses"); // Return to course list
     } catch (err) {
       alert("Error deleting course: " + err.message);
+    }
+  };
+
+  const toggleAvailability = async () => {
+    try {
+      setAvailabilityLoading(true);
+      const response = await apiConfig.toggleCourseAvailability(courseId);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to toggle availability");
+      }
+
+      // Update the course state with new availability
+      setCourse(prev => ({ ...prev, isAvailable: result.data.isAvailable }));
+      setEnrollmentStatus(result.message);
+    } catch (err) {
+      setEnrollmentStatus("Error toggling availability: " + err.message);
+    } finally {
+      setAvailabilityLoading(false);
     }
   };
 
@@ -177,6 +202,20 @@ function CourseDetail({ courseId }) {
               <strong>📅 Created:</strong>{" "}
               {new Date(course.createdAt).toLocaleDateString()}
             </p>
+            {course.createdBy && (
+              <p>
+                <strong>👨‍🏫 Created by:</strong>{" "}
+                {course.createdBy.name} ({course.createdBy.teacherId})
+              </p>
+            )}
+            {role === "teacher" && (
+              <p>
+                <strong>👁️ Availability:</strong>{" "}
+                <span className={`availability-status ${course.isAvailable ? 'available' : 'hidden'}`}>
+                  {course.isAvailable ? "Visible to students" : "Hidden from students"}
+                </span>
+              </p>
+            )}
           </div>
           {isAuthenticated() && (
             <div className="course-actions">
@@ -201,16 +240,36 @@ function CourseDetail({ courseId }) {
               )}
 
               {role === "teacher" && (
-                <div>
-                  <button onClick={() => setIsEditing(true)}>
-                    Edit Course
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    className="delete-btn"
-                  >
-                    Delete Course
-                  </button>
+                <div className="teacher-actions">
+                  {isCreator ? (
+                    <>
+                      <button onClick={() => setIsEditing(true)}>
+                        Edit Course
+                      </button>
+                      <button
+                        onClick={toggleAvailability}
+                        className={`availability-btn ${course.isAvailable ? 'hide-btn' : 'show-btn'}`}
+                        disabled={availabilityLoading}
+                      >
+                        {availabilityLoading 
+                          ? "⏳ Updating..." 
+                          : course.isAvailable 
+                            ? "👁️‍🗨️ Hide from Students" 
+                            : "👁️ Show to Students"
+                        }
+                      </button>
+                      <button
+                        onClick={handleDelete}
+                        className="delete-btn"
+                      >
+                        Delete Course
+                      </button>
+                    </>
+                  ) : (
+                    <div className="not-creator-message">
+                      <p>🔒 Only the course creator can edit or delete this course.</p>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -48,6 +48,13 @@ export const apiConfig = {
         ...options.headers,
       },
     });
+  },
+
+  // Course availability toggle
+  toggleCourseAvailability: async (courseId) => {
+    return apiConfig.fetchWithAuth(`/courses/${courseId}/availability`, {
+      method: 'PATCH',
+    });
   }
 };
 

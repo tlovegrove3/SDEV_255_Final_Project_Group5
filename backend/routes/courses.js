@@ -34,7 +34,8 @@ router.get("/", async (req, res) => {
 // GET /api/courses/:id - Get single course
 router.get("/:id", async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await Course.findById(req.params.id)
+      .populate('createdBy', 'name teacherId');
     if (!course) {
       return res.status(404).json({
         success: false,
@@ -104,21 +105,31 @@ router.post("/", authenticate, requireTeacher, async (req, res) => {
   }
 });
 
-// PUT /api/courses/:id - Update course (Teachers only)
+// PUT /api/courses/:id - Update course (Only course creator)
 router.put("/:id", authenticate, requireTeacher, async (req, res) => {
   try {
-    const updatedCourse = await Course.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body, updatedAt: Date.now() },
-      { new: true, runValidators: true }
-    );
+    const course = await Course.findById(req.params.id);
 
-    if (!updatedCourse) {
+    if (!course) {
       return res.status(404).json({
         success: false,
         error: "Course not found",
       });
     }
+
+    // Check if the authenticated teacher created this course
+    if (course.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: "Only the course creator can edit this course",
+      });
+    }
+
+    const updatedCourse = await Course.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: Date.now() },
+      { new: true, runValidators: true }
+    );
 
     res.json({
       success: true,

@@ -186,26 +186,13 @@ backend/
 
 🚨 Missing Features
 
-1. Teacher Course Ownership ❌
-
-- Requirement: "Only courses created by the currently signed-in teacher can be deleted"
-- Current Status: Any teacher can delete any course
-- Missing: createdBy field in Course model to track teacher ownership
-
-2. Course Availability Toggle ❌
-
-- Requirement: "Teachers should be able to add and drop courses to the available classes
-  listing"
-- Current Status: Courses are either created or deleted
-- Missing: isAvailable field to hide/show courses for students without deleting
-
-3. Shopping Cart System ❌
+Shopping Cart System ❌
 
 - Requirement: "Create a 'Shopping Cart' for students to add and remove pending courses"
 - Current Status: Direct enrollment only
 - Missing: Cart functionality for pending course selections before final enrollment
 
-4. Course Search ❌
+Course Search ❌
 
 - Requirement: "Students should be able to navigate and search for classes either based on the
   course name or number"
