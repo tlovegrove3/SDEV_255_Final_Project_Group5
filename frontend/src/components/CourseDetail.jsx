@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useHash } from "../hooks/useHash";
 import { apiConfig } from "../config/api";
 import { useAuth } from "../hooks/useAuth";
+import { useCart } from "../contexts/CartContext";
 
 function CourseDetail({ courseId }) {
   const [course, setCourse] = useState(null);
@@ -13,7 +14,10 @@ function CourseDetail({ courseId }) {
   const [enrollmentStatus, setEnrollmentStatus] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
   const { isAuthenticated, getRole, user } = useAuth();
+  const { refreshCart } = useCart();
   const role = getRole();
   
   // Check if current user is the course creator
@@ -35,22 +39,63 @@ function CourseDetail({ courseId }) {
     }
   };
 
-  const enrollInCourse = async () => {
+  const checkCartStatus = async () => {
+    if (role === "student" && isAuthenticated()) {
+      try {
+        const response = await apiConfig.fetchWithAuth("/cart");
+        const data = await response.json();
+        if (data.success) {
+          const inCart = data.data.courses.some((course) => course._id === courseId);
+          setIsInCart(inCart);
+        }
+      } catch (error) {
+        console.error("Error checking cart:", error);
+      }
+    }
+  };
+
+  const addToCart = async () => {
     try {
-      const response = await apiConfig.fetchWithAuth("/students/enroll", {
+      setCartLoading(true);
+      const response = await apiConfig.fetchWithAuth("/cart/add", {
         method: "POST",
         body: JSON.stringify({ courseId }),
       });
       const data = await response.json();
 
       if (data.success) {
-        setIsEnrolled(true);
-        setEnrollmentStatus("Successfully enrolled!");
+        setIsInCart(true);
+        setEnrollmentStatus("Course added to cart!");
+        refreshCart(); // Update cart count
       } else {
         setEnrollmentStatus(`Error: ${data.error}`);
       }
     } catch (error) {
-      setEnrollmentStatus("Enrollment failed");
+      setEnrollmentStatus("Failed to add to cart");
+    } finally {
+      setCartLoading(false);
+    }
+  };
+
+  const removeFromCart = async () => {
+    try {
+      setCartLoading(true);
+      const response = await apiConfig.fetchWithAuth(`/cart/${courseId}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setIsInCart(false);
+        setEnrollmentStatus("Course removed from cart");
+        refreshCart(); // Update cart count
+      } else {
+        setEnrollmentStatus(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      setEnrollmentStatus("Failed to remove from cart");
+    } finally {
+      setCartLoading(false);
     }
   };
 
@@ -81,6 +126,7 @@ function CourseDetail({ courseId }) {
     if (courseId) {
       fetchCourse();
       checkEnrollmentStatus();
+      checkCartStatus();
     }
   }, [courseId]);
 
@@ -220,21 +266,45 @@ function CourseDetail({ courseId }) {
           {isAuthenticated() && (
             <div className="course-actions">
               {role === "student" && (
-                <div>
+                <div className="student-actions">
                   {isEnrolled ? (
-                    <button
-                      onClick={dropCourse}
-                      className="drop-btn"
-                    >
-                      Drop Course
-                    </button>
+                    <div>
+                      <p className="enrolled-status">✅ Already enrolled in this course</p>
+                      <button onClick={dropCourse} className="drop-btn">
+                        Drop Course
+                      </button>
+                    </div>
                   ) : (
-                    <button
-                      onClick={enrollInCourse}
-                      className="enroll-btn"
-                    >
-                      Enroll in Course
-                    </button>
+                    <div className="cart-actions">
+                      {isInCart ? (
+                        <div>
+                          <p className="cart-status">🛒 Course is in your cart</p>
+                          <button
+                            onClick={removeFromCart}
+                            disabled={cartLoading}
+                            className="remove-cart-btn"
+                          >
+                            {cartLoading ? "⏳ Removing..." : "🗑️ Remove from Cart"}
+                          </button>
+                          <button
+                            onClick={() => navigate("/cart")}
+                            className="view-cart-btn"
+                          >
+                            🛒 View Cart
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <button
+                            onClick={addToCart}
+                            disabled={cartLoading}
+                            className="add-cart-btn"
+                          >
+                            {cartLoading ? "⏳ Adding..." : "🛒 Add to Cart"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               )}

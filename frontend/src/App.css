@@ -580,7 +580,7 @@ body {
 ======================================== */
 @media (max-width: 768px) {
   :root {
-    --sidebar-width: 160px; /* Increase sidebar width to prevent text truncation */
+    --sidebar-width: 100px; /* Increase sidebar width to prevent text truncation */
   }
 
   .app-layout {
@@ -750,13 +750,13 @@ body {
 
   /* Smaller sidebar elements */
   .sidebar {
-    padding: 0.5rem;
+    padding: 0.25rem;
   }
 
   .nav-links button {
-    font-size: 0.75rem;
+    font-size: 0.5rem;
     padding: 0.5rem;
-    min-height: 36px;
+    min-height: 30px;
   }
 
   .user-info {
@@ -764,11 +764,11 @@ body {
   }
 
   .user-name {
-    font-size: 0.75rem;
+    font-size: 0.5rem;
   }
 
   .user-role {
-    font-size: 0.65rem;
+    font-size: 0.5rem;
   }
 
   .main-content {
@@ -977,4 +977,43 @@ body {
   color: #4a5568;
   font-size: 0.875rem;
   text-align: center;
+}
+
+/* ========================================
+   Shopping Cart Styles (Simple)
+======================================== */
+
+/* Reuse existing .course-info-card for cart summary */
+.cart-summary {
+  margin-bottom: 1rem;
+}
+
+/* Cart button with count badge */
+.cart-btn {
+  position: relative;
+}
+
+.cart-count {
+  background: #e53e3e;
+  color: white;
+  border-radius: 50%;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+  margin-left: 0.25rem;
+}
+
+/* Simple cart actions - reuse existing button styles */
+.cart-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.add-cart-btn {
+  background: #4299e1;
+  color: white;
+}
+
+.add-cart-btn:hover:not(:disabled) {
+  background: #3182ce;
 }

@@ -1,9 +1,11 @@
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../contexts/ThemeContext";
+import { useCart } from "../contexts/CartContext";
 
 const Navigation = () => {
   const { user, isAuthenticated, getRole, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { cartCount } = useCart();
 
   const handleNavigation = (hash) => {
     window.location.hash = hash;
@@ -42,6 +44,9 @@ const Navigation = () => {
               <>
                 <button onClick={() => handleNavigation("#/courses")}>
                   All Courses
+                </button>
+                <button onClick={() => handleNavigation("#/cart")} className="cart-btn">
+                  🛒 Cart {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
                 </button>
                 <button onClick={() => handleNavigation("#/my-courses")}>
                   My Courses
